@@ -753,7 +753,7 @@ class TaskFlowApp:
 
         tk.Label(
             welcome,
-            text="Welcome back 👋",
+            text="Welcome back",
             font=("Segoe UI", 14, "bold"),
             bg=t["bg"],
             fg=t["text"],
