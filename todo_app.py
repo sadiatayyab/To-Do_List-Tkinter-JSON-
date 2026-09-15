@@ -5,33 +5,14 @@ import csv
 import os
 from datetime import datetime, date, timedelta
 
-
 APP_TITLE = "TaskFlow Pro"
 DATA_FILE = "tasks.json"
 FEEDBACK_FILE = "feedback.json"
 
-CATEGORIES = [
-    "General",
-    "Study",
-    "Work",
-    "Personal",
-    "Shopping",
-    "Health",
-    "Finance",
-    "Travel",
-    "Fitness",
-    "Family",
-    "Projects",
-    "Meetings",
-    "Learning",
-    "Home",
-    "Errands",
-    "Other",
-]
+CATEGORIES = ["General", "Study", "Work", "Personal", "Shopping", "Health", "Finance", "Travel", "Fitness", "Family", "Projects", "Meetings", "Learning", "Home", "Errands", "Other",]
 
 PRIORITIES = ["Low", "Medium", "High", "Urgent"]
 STATUSES = ["Pending", "In Progress", "Completed"]
-
 
 DARK = {
     "bg": "#0B0B12",
@@ -70,60 +51,46 @@ LIGHT = {
     "white": "#FFFFFF",
     "hover": "#F0EEFF",
 }
-
-
 class TaskFlowApp:
     def __init__(self, root):
         self.root = root
         self.root.title(APP_TITLE)
         self.root.geometry("1240x820")
         self.root.minsize(1050, 700)
-
         self.is_dark = True
         self.theme = DARK
         self.tasks = []
         self.current_page = "dashboard"
         self.selected_task_id = None
-
         self.name_var = tk.StringVar()
         self.category_var = tk.StringVar(value="General")
         self.priority_var = tk.StringVar(value="Medium")
         self.status_var = tk.StringVar(value="Pending")
         self.due_date_var = tk.StringVar()
         self.due_time_var = tk.StringVar()
-
         self.search_var = tk.StringVar()
         self.filter_status_var = tk.StringVar(value="All")
         self.filter_category_var = tk.StringVar(value="All")
-
         self.feedback_name = tk.StringVar()
         self.feedback_email = tk.StringVar()
-
         self.load_tasks()
         self.setup_styles()
         self.build_ui()
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
-    # =========================================================
-    # DATA
-    # =========================================================
     def load_tasks(self):
         if not os.path.exists(DATA_FILE):
             self.tasks = []
             return
-
         try:
             with open(DATA_FILE, "r", encoding="utf-8") as file:
                 data = json.load(file)
-
             if isinstance(data, list):
                 self.tasks = data
             elif isinstance(data, dict) and isinstance(data.get("tasks"), list):
                 self.tasks = data["tasks"]
             else:
                 self.tasks = []
-
-            # Normalize older/incomplete records.
             for task in self.tasks:
                 task.setdefault("id", self.generate_id())
                 task.setdefault("title", "Untitled")
@@ -141,7 +108,7 @@ class TaskFlowApp:
                 f"tasks.json could not be read.\n\n{exc}\n\nStarting with an empty task list.",
             )
             self.tasks = []
-
+            
     def save_tasks(self):
         try:
             temp_file = DATA_FILE + ".tmp"
@@ -163,9 +130,6 @@ class TaskFlowApp:
                 return task
         return None
 
-    # =========================================================
-    # STYLE
-    # =========================================================
     def setup_styles(self):
         self.style = ttk.Style()
         try:
@@ -176,7 +140,6 @@ class TaskFlowApp:
 
     def apply_ttk_styles(self):
         t = self.theme
-
         self.style.configure(
             "Treeview",
             background=t["card"],
@@ -191,7 +154,6 @@ class TaskFlowApp:
             background=[("selected", t["primary"])],
             foreground=[("selected", t["white"])],
         )
-
         self.style.configure(
             "Treeview.Heading",
             background=t["surface"],
@@ -205,7 +167,6 @@ class TaskFlowApp:
             background=[("active", t["hover"])],
             foreground=[("active", t["text"])],
         )
-
         self.style.configure(
             "TCombobox",
             fieldbackground=t["input"],
@@ -222,7 +183,6 @@ class TaskFlowApp:
             selectbackground=[("readonly", t["input"])],
             selectforeground=[("readonly", t["text"])],
         )
-
         self.style.configure(
             "Vertical.TScrollbar",
             background=t["border"],
@@ -231,9 +191,6 @@ class TaskFlowApp:
             borderwidth=0,
         )
 
-    # =========================================================
-    # BASIC UI HELPERS
-    # =========================================================
     def clear_root(self):
         for widget in self.root.winfo_children():
             widget.destroy()
@@ -249,7 +206,6 @@ class TaskFlowApp:
             "accent": (t["accent"], "#0369A1", t["white"]),
         }
         bg, active, fg = colors[kind]
-
         button = tk.Button(
             parent,
             text=text,
@@ -313,13 +269,9 @@ class TaskFlowApp:
             **kwargs,
         )
 
-    # =========================================================
-    # MAIN UI
-    # =========================================================
     def build_ui(self):
         self.clear_root()
         self.root.configure(bg=self.theme["bg"])
-
         self.build_sidebar()
 
         self.content = tk.Frame(self.root, bg=self.theme["bg"])
@@ -793,9 +745,6 @@ class TaskFlowApp:
         }
         builders[page]()
 
-    # =========================================================
-    # DASHBOARD
-    # =========================================================
     def build_dashboard(self):
         t = self.theme
 
@@ -1118,9 +1067,6 @@ class TaskFlowApp:
         if hasattr(self, "add_name_entry"):
             self.add_name_entry.focus_set()
 
-    # =========================================================
-    # VALIDATION / SAVE
-    # =========================================================
     def validate_task(self, title, category, priority, status, due_date, due_time):
         if not title:
             messagebox.showwarning("Missing Task Name", "Please enter a task name.")
@@ -1197,9 +1143,6 @@ class TaskFlowApp:
             self.clear_add_form()
             self.show_page("tasks")
 
-    # =========================================================
-    # TASKS PAGE
-    # =========================================================
     def build_tasks_page(self):
         t = self.theme
         card = self.card(self.page_container)
@@ -1435,10 +1378,7 @@ class TaskFlowApp:
             ]
             self.save_tasks()
             self.refresh_tree()
-
-    # =========================================================
-    # EDIT PAGE
-    # =========================================================
+            
     def build_edit_page(self):
         t = self.theme
         card = self.card(self.page_container)
@@ -1654,9 +1594,6 @@ class TaskFlowApp:
             self.selected_task_id = task.get("id")
             self.show_page("tasks")
 
-    # =========================================================
-    # DELETE PAGE
-    # =========================================================
     def build_delete_page(self):
         t = self.theme
         card = self.card(self.page_container)
@@ -1765,9 +1702,6 @@ class TaskFlowApp:
             if self.current_page == "delete":
                 self.show_page("delete")
 
-    # =========================================================
-    # REPORTS
-    # =========================================================
     def build_reports_page(self):
         t = self.theme
         card = self.card(self.page_container)
@@ -1996,9 +1930,6 @@ class TaskFlowApp:
         with open(path, "w", encoding="utf-8") as file:
             json.dump(self.tasks, file, indent=4, ensure_ascii=False)
 
-    # =========================================================
-    # FEEDBACK
-    # =========================================================
     def build_feedback_page(self):
         t = self.theme
         card = self.card(self.page_container)
@@ -2090,18 +2021,12 @@ class TaskFlowApp:
         self.feedback_message.delete("1.0", "end")
         messagebox.showinfo("Thank You", "Your feedback has been saved successfully.")
 
-    # =========================================================
-    # THEME
-    # =========================================================
     def toggle_theme(self):
         self.is_dark = not self.is_dark
         self.theme = DARK if self.is_dark else LIGHT
         self.setup_styles()
         self.build_ui()
 
-    # =========================================================
-    # CLOSE
-    # =========================================================
     def on_close(self):
         self.save_tasks()
         self.root.destroy()
